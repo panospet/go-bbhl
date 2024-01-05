@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -13,8 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kkdai/youtube/v2"
-
+	"go-bbhl/downloader"
 	"go-bbhl/util"
 )
 
@@ -25,6 +23,8 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+
 	var dry bool
 	flag.BoolVar(&dry, "dry", false, "dry run")
 	flag.Parse()
@@ -36,7 +36,7 @@ func main() {
 		channelID,
 	)
 
-	ctx := context.Background()
+	dl := downloader.NewYoutubeDownloader()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -84,7 +84,7 @@ func main() {
 		}
 
 		if !dry {
-			if err := downloadVideo(v.Id, videoPath); err != nil {
+			if err := dl.DownloadVideo(v.Id, videoPath); err != nil {
 				log.Fatalf("Error downloading video: %v", err)
 			}
 		}
@@ -96,11 +96,19 @@ func main() {
 
 	// use ffmpeg terminal command to concat files
 	// ffmpeg -f concat -safe 0 -i videos.txt -c copy output.mp4
-	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", "output.mp4")
+	cmd := exec.Command(
+		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", "output.mp4",
+	)
 
 	err = cmd.Run()
 	if err != nil {
 		log.Fatalf("Error running ffmpeg command: %v", err)
+	}
+	log.Printf("Successfully concatenated videos to output.mp4")
+
+	// remove videos directory
+	if err := os.RemoveAll("./videos"); err != nil {
+		log.Fatalf("Error removing videos directory: %v", err)
 	}
 }
 
@@ -150,40 +158,6 @@ func filter(videos []VideoInfo) ([]VideoInfo, error) {
 type VideoInfo struct {
 	Id    string
 	Title string
-}
-
-func downloadVideo(
-	videoId string,
-	path string,
-) error {
-	client := youtube.Client{}
-
-	url := fmt.Sprintf("https://www.youtube.com/watch?v=%s", videoId)
-
-	videoInfo, err := client.GetVideo(url)
-	if err != nil {
-		return err
-	}
-
-	audioFormat := videoInfo.Formats.WithAudioChannels()
-	videoStream, _, err := client.GetStream(videoInfo, &audioFormat[0])
-	if err != nil {
-		return err
-	}
-
-	videoFile, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer videoFile.Close()
-
-	_, err = io.Copy(videoFile, videoStream)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Successfully downloaded: %v", url)
-	return nil
 }
 
 type YoutubeResponse struct {
