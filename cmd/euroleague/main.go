@@ -15,9 +15,7 @@ import (
 )
 
 const (
-	apiKey              = "AIzaSyDxFBI9kEBKLsWsX30ykHgoq7nByqEDCN4"
 	euroleagueChannelId = "UCGr3nR_XH9r6E5b09ZJAT9w"
-	youtubeApiUrl       = "https://www.googleapis.com/youtube/v3/search"
 )
 
 func main() {
@@ -29,7 +27,7 @@ func main() {
 
 	dl := downloader.NewYoutubeDownloader()
 
-	ytClient := youtube.NewClient(apiKey)
+	ytClient := youtube.NewClient(os.Getenv("YOUTUBE_API_KEY"))
 
 	videos, err := ytClient.GetChannelVideos(
 		ctx,
