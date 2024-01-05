@@ -25,8 +25,9 @@ func NewClient(apiKey string) *Client {
 }
 
 type VideoInfo struct {
-	Id    string
-	Title string
+	Id          string
+	Title       string
+	PublishedAt time.Time
 }
 
 type YoutubeResponse struct {
@@ -109,8 +110,9 @@ func (c *Client) GetChannelVideos(
 	for _, item := range response.Items {
 		videos = append(
 			videos, VideoInfo{
-				Id:    item.Id.VideoId,
-				Title: item.Snippet.Title,
+				Id:          item.Id.VideoId,
+				Title:       item.Snippet.Title,
+				PublishedAt: item.Snippet.PublishedAt,
 			},
 		)
 	}
