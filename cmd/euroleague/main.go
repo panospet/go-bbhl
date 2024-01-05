@@ -7,10 +7,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 
 	"go-bbhl/downloader"
-	"go-bbhl/util"
+	"go-bbhl/filters"
 	"go-bbhl/youtube"
 )
 
@@ -38,7 +37,7 @@ func main() {
 		log.Fatalf("Error getting channel videos: %v", err)
 	}
 
-	videos, err = filter(videos)
+	videos, err = filters.EuroleagueLatestRound(videos)
 	if err != nil {
 		log.Fatalf("Error filtering videos: %v", err)
 	}
@@ -62,6 +61,10 @@ func main() {
 				log.Fatalf("Error downloading video: %v", err)
 			}
 		}
+	}
+
+	if dry {
+		return
 	}
 
 	if err := writeLinesToFile(paths, "./videos.txt"); err != nil {
@@ -103,29 +106,4 @@ func writeLinesToFile(
 	}
 
 	return nil
-}
-
-func filter(videos []youtube.VideoInfo) ([]youtube.VideoInfo, error) {
-	byRound := make(map[int][]youtube.VideoInfo)
-	latestRound := 0
-	for _, v := range videos {
-		if !strings.Contains(strings.ToLower(v.Title), "highlights") {
-			continue
-		}
-
-		// get last euroleague round based on video title
-		round, err := util.ExtractElRound(v.Title)
-		if err != nil {
-			return nil, err
-		}
-
-		byRound[round] = append(byRound[round], v)
-		if round > latestRound {
-			latestRound = round
-		}
-	}
-
-	log.Printf("Latest round: %v. Total videos: %d", latestRound, len(byRound[latestRound]))
-
-	return byRound[latestRound], nil
 }
