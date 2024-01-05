@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -63,18 +64,15 @@ func main() {
 		)
 	}
 
-	// debug
-	for _, v := range videos {
-		log.Printf("Video: %v", v)
-	}
-
 	videos, err = filter(videos)
 	if err != nil {
 		log.Fatalf("Error filtering videos: %v", err)
 	}
 
+	paths := make([]string, len(videos))
 	for i, v := range videos {
 		videoPath := fmt.Sprintf("./videos/%d.mp4", i)
+		paths[i] = fmt.Sprintf("file '%s'", videoPath)
 
 		log.Printf("Downloading video: %s, id: %v, path: %s", v.Title, v.Id, videoPath)
 
@@ -91,6 +89,38 @@ func main() {
 			}
 		}
 	}
+
+	if err := writeLinesToFile(paths, "./videos.txt"); err != nil {
+		log.Fatalf("Error writing paths to file: %v", err)
+	}
+
+	// use ffmpeg terminal command to concat files
+	// ffmpeg -f concat -safe 0 -i videos.txt -c copy output.mp4
+	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", "output.mp4")
+
+	err = cmd.Run()
+	if err != nil {
+		log.Fatalf("Error running ffmpeg command: %v", err)
+	}
+}
+
+func writeLinesToFile(
+	lines []string,
+	path string,
+) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	for _, line := range lines {
+		if _, err := file.WriteString(line + "\n"); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func filter(videos []VideoInfo) ([]VideoInfo, error) {
