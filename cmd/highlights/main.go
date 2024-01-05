@@ -14,15 +14,34 @@ import (
 )
 
 const (
-	euroleagueChannelId = "UCGr3nR_XH9r6E5b09ZJAT9w"
+	motionStationChannelId = "UCLd4dSmXdrJykO_hgOzbfPw"
+	euroleagueChannelId    = "UCGr3nR_XH9r6E5b09ZJAT9w"
 )
 
 func main() {
 	ctx := context.Background()
 
-	var dry bool
+	var dry, nba, euroleague bool
 	flag.BoolVar(&dry, "dry", false, "dry run")
+	flag.BoolVar(&nba, "nba", false, "run for nba")
+	flag.BoolVar(&euroleague, "euroleague", false, "run for euroleague")
 	flag.Parse()
+
+	// should be either nba or euroleague
+	if nba && euroleague || !nba && !euroleague {
+		log.Fatalf("Only one of nba or euroleague flags should be set")
+	}
+
+	var channelId string
+	var filter func([]youtube.VideoInfo) ([]youtube.VideoInfo, error)
+	if nba {
+		channelId = motionStationChannelId
+		filter = filters.NbaLatest
+	}
+	if euroleague {
+		channelId = euroleagueChannelId
+		filter = filters.EuroleagueLatestRound
+	}
 
 	dl := downloader.NewYoutubeDownloader()
 
@@ -30,14 +49,14 @@ func main() {
 
 	videos, err := ytClient.GetChannelVideos(
 		ctx,
-		euroleagueChannelId,
+		channelId,
 		50,
 	)
 	if err != nil {
 		log.Fatalf("Error getting channel videos: %v", err)
 	}
 
-	videos, err = filters.EuroleagueLatestRound(videos)
+	videos, err = filter(videos)
 	if err != nil {
 		log.Fatalf("Error filtering videos: %v", err)
 	}
