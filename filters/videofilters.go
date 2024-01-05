@@ -3,6 +3,7 @@ package filters
 import (
 	"log"
 	"strings"
+	"time"
 
 	"go-bbhl/util"
 	"go-bbhl/youtube"
@@ -33,4 +34,24 @@ func EuroleagueLatestRound(
 	log.Printf("Latest round: %v. Total videos: %d", latestRound, len(byRound[latestRound]))
 
 	return byRound[latestRound], nil
+}
+
+func NbaLatest(
+	videos []youtube.VideoInfo,
+) ([]youtube.VideoInfo, error) {
+	var res []youtube.VideoInfo
+	for i, v := range videos {
+		// if publishedAt is earlier than 10 hours before the previous video, break
+		// that's how we assumed that game day is over
+		if i > 0 {
+			prevVideo := videos[i-1]
+			if v.PublishedAt.Before(prevVideo.PublishedAt.Add(-10 * time.Hour)) {
+				break
+			}
+		}
+
+		res = append(res, v)
+	}
+
+	return res, nil
 }
