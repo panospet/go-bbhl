@@ -7,9 +7,6 @@ COPY . ./
 RUN apk update && apk add --no-cache make
 RUN make build
 
-FROM alpine:latest
-
+FROM ubuntu:latest
+RUN apt-get update && apt-get install -y ffmpeg
 COPY --from=build /build/bin/highlights /usr/bin
-
-RUN apk add --no-cache
-ENTRYPOINT ["highlights"]

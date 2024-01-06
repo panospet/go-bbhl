@@ -9,3 +9,12 @@ build:
 .PHONY: container
 container: ## create docker container
 	docker build -t p4nospet/basketball-highlights .
+
+
+.PHONE: run-container-euroleague
+run-container-euroleague:
+	docker run -it --rm --env-file .env p4nospet/basketball-highlights highlights -euroleague
+
+.PHONE: run-container-nba
+run-container-nba:
+	docker run -it --rm --env-file .env p4nospet/basketball-highlights highlights -nba
