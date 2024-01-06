@@ -3,3 +3,4 @@ videos
 *.mp4
 *.txt
 .envrc
+bin
