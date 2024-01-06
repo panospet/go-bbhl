@@ -8,5 +8,5 @@ RUN apk update && apk add --no-cache make
 RUN make build
 
 FROM ubuntu:latest
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y ca-certificates ffmpeg
 COPY --from=build /build/bin/highlights /usr/bin
