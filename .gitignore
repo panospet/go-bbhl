@@ -4,3 +4,4 @@ videos
 *.txt
 .envrc
 bin
+.env
