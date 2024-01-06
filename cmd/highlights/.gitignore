@@ -1,5 +1,5 @@
-.env
+.envrc
 highlights
-output.mp4
+../teleplay/output.mp4
 videos
 videos.txt
