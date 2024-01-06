@@ -7,9 +7,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"time"
+
+	"github.com/caarlos0/env/v9"
 
 	"go-bbhl/downloader"
 	"go-bbhl/filters"
+	"go-bbhl/uploaders/telegram"
 	"go-bbhl/youtube"
 )
 
@@ -17,6 +21,12 @@ const (
 	motionStationChannelId = "UCLd4dSmXdrJykO_hgOzbfPw"
 	euroleagueChannelId    = "UCGr3nR_XH9r6E5b09ZJAT9w"
 )
+
+type config struct {
+	TelegramToken string `env:"TELE_TOKEN,required"`
+	ChatId        int64  `env:"CHAT_ID,required"`
+	YoutubeApiKey string `env:"YOUTUBE_API_KEY,required"`
+}
 
 func main() {
 	ctx := context.Background()
@@ -27,25 +37,43 @@ func main() {
 	flag.BoolVar(&euroleague, "euroleague", false, "run for euroleague")
 	flag.Parse()
 
+	cfg := config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatal(err)
+	}
+
 	// should be either nba or euroleague
 	if nba && euroleague || !nba && !euroleague {
 		log.Fatalf("Only one of nba or euroleague flags should be set")
 	}
 
-	var channelId string
+	var channelId, caption string
 	var filter func([]youtube.VideoInfo) ([]youtube.VideoInfo, error)
 	if nba {
 		channelId = motionStationChannelId
 		filter = filters.NbaLatest
+		caption = "latest NBA Highlights"
 	}
 	if euroleague {
 		channelId = euroleagueChannelId
 		filter = filters.EuroleagueLatestRound
+		caption = "latest Euroleague Highlights"
 	}
+
+	start := time.Now()
 
 	dl := downloader.NewYoutubeDownloader()
 
-	ytClient := youtube.NewClient(os.Getenv("YOUTUBE_API_KEY"))
+	ytClient := youtube.NewClient(cfg.YoutubeApiKey)
+
+	upl, err := telegram.NewTelegramUploader(
+		cfg.TelegramToken,
+		cfg.ChatId,
+		"http://65.109.174.137:8081/bot%s/%s",
+	)
+	if err != nil {
+		log.Fatalf("Error creating uploader: %v", err)
+	}
 
 	videos, err := ytClient.GetChannelVideos(
 		ctx,
@@ -106,6 +134,21 @@ func main() {
 	if err := os.RemoveAll("./videos"); err != nil {
 		log.Fatalf("Error removing videos directory: %v", err)
 	}
+
+	log.Printf("uploading video to telegram channel...")
+	if err := upl.UploadVideo("output.mp4", caption); err != nil {
+		log.Fatalf("Error uploading video: %v", err)
+	}
+
+	// remove videos.txt and output.mp4
+	if err := os.Remove("./videos.txt"); err != nil {
+		log.Fatalf("Error removing videos.txt: %v", err)
+	}
+	if err := os.Remove("./output.mp4"); err != nil {
+		log.Fatalf("Error removing output.mp4: %v", err)
+	}
+
+	log.Printf("finished after %v", time.Since(start))
 }
 
 func writeLinesToFile(
