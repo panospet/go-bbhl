@@ -14,14 +14,21 @@ build-sample:
 container: ## create docker container
 	docker build -t p4nospet/basketball-highlights .
 
-
-.PHONY: run-container-euroleague
-run-container-euroleague:
+.PHONY: run-euroleague
+run-euroleague:
 	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -euroleague
 
-.PHONY: run-container-nba
-run-container-nba:
+.PHONY: run-nba
+run-nba:
 	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -nba
+
+.PHONY: dry-run-euroleague
+dry-run-euroleague:
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -euroleague -dry
+
+.PHONY: dry-run-nba
+dry-run-nba:
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -nba -dry
 
 .PHONY: send-sample
 run-container-sample:
