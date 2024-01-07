@@ -117,8 +117,6 @@ func main() {
 		videoPath := fmt.Sprintf("./videos/%d.mp4", i)
 		paths[i] = fmt.Sprintf("file '%s'", videoPath)
 
-		log.Printf("Downloading video: %s, id: %v, path: %s", v.Title, v.Id, videoPath)
-
 		// create .videos directory if not exists
 		if _, err := os.Stat("./videos"); os.IsNotExist(err) {
 			if err := os.Mkdir("./videos", 0755); err != nil {
@@ -126,6 +124,7 @@ func main() {
 			}
 		}
 
+		log.Printf("Downloading video: %s, id: %v, path: %s", v.Title, v.Id, videoPath)
 		if !dry {
 			if err := dl.DownloadVideo(v.Id, videoPath); err != nil {
 				log.Fatalf("Error downloading video: %v", err)
