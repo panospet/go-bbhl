@@ -69,6 +69,7 @@ func main() {
 	upl, err := telegram.NewTelegramUploader(
 		cfg.TelegramToken,
 		cfg.ChatId,
+		// todo change to env var
 		"http://65.109.174.137:8081/bot%s/%s",
 	)
 	if err != nil {
