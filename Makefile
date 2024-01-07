@@ -24,5 +24,5 @@ run-container-nba:
 	docker run --rm --env-file .env p4nospet/basketball-highlights highlights -nba
 
 .PHONY: send-sample
-run-container-nba:
+run-container-sample:
 	docker run --rm --env-file .env p4nospet/basketball-highlights sample
