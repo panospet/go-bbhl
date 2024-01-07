@@ -5,3 +5,4 @@ videos
 .envrc
 bin
 .env
+test-cmd
