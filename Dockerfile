@@ -11,4 +11,4 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y ca-certificates ffmpeg
 COPY --from=build /build/bin/highlights /usr/bin
 COPY --from=build /build/bin/sample /usr/bin
-COPY --from=build /build/bin/gopher.mp4 /usr/bin
+COPY --from=build /build/cmd/sample/gopher.mp4  /usr/bin
