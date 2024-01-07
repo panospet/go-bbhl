@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/caarlos0/env/v9"
@@ -14,6 +15,7 @@ import (
 	"go-bbhl/downloader"
 	"go-bbhl/filters"
 	"go-bbhl/uploaders/telegram"
+	"go-bbhl/util"
 	"go-bbhl/youtube"
 )
 
@@ -62,6 +64,17 @@ func main() {
 
 	start := time.Now()
 
+	history, err := util.ReadFileLines("./data/history.txt")
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.Fatalf("Error reading history file: %v", err)
+		}
+	}
+	historyMap := make(map[string]bool)
+	for _, h := range history {
+		historyMap[h] = true
+	}
+
 	dl := downloader.NewYoutubeDownloader()
 
 	ytClient := youtube.NewClient(cfg.YoutubeApiKey)
@@ -90,6 +103,15 @@ func main() {
 		log.Fatalf("Error filtering videos: %v", err)
 	}
 
+	// filter out videos that are already in history
+	var filteredVideos []youtube.VideoInfo
+	for _, v := range videos {
+		if _, ok := historyMap[v.Id]; !ok {
+			filteredVideos = append(filteredVideos, v)
+		}
+	}
+	videos = filteredVideos
+
 	paths := make([]string, len(videos))
 	for i, v := range videos {
 		videoPath := fmt.Sprintf("./videos/%d.mp4", i)
@@ -111,7 +133,19 @@ func main() {
 		}
 	}
 
-	if dry {
+	newLines := make([]string, len(videos))
+	for i, v := range videos {
+		newLines[i] = v.Id
+	}
+	err = util.AppendLinesToFile(
+		newLines,
+		filepath.Join(os.Getenv("DATA_DIR"), "history.txt"),
+	)
+	if err != nil {
+		log.Printf("Error appending lines to history file: %v", err)
+	}
+
+	if dry || len(newLines) == 0 {
 		return
 	}
 

@@ -4,11 +4,11 @@ run:
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build -ldflags='-w -s -extldflags "-static"' -o ./bin/highlights cmd/highlights/main.go
+	go build -o ./bin/highlights cmd/highlights/main.go
 
 .PHONY: build-sample
 build-sample:
-	CGO_ENABLED=0 go build -ldflags='-w -s -extldflags "-static"' -o ./bin/sample cmd/sample/main.go
+	go build -o ./bin/sample cmd/sample/main.go
 
 .PHONY: container
 container: ## create docker container
@@ -17,11 +17,11 @@ container: ## create docker container
 
 .PHONY: run-container-euroleague
 run-container-euroleague:
-	docker run --rm --env-file .env p4nospet/basketball-highlights highlights -euroleague
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -euroleague
 
 .PHONY: run-container-nba
 run-container-nba:
-	docker run --rm --env-file .env p4nospet/basketball-highlights highlights -nba
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -nba
 
 .PHONY: send-sample
 run-container-sample:
