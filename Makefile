@@ -7,7 +7,7 @@ build:
 	CGO_ENABLED=0 go build -ldflags='-w -s -extldflags "-static"' -o ./bin/highlights cmd/highlights/main.go
 
 .PHONY: build-sample
-build:
+build-sample:
 	CGO_ENABLED=0 go build -ldflags='-w -s -extldflags "-static"' -o ./bin/sample cmd/sample/main.go
 
 .PHONY: container
