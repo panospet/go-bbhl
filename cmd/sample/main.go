@@ -30,7 +30,7 @@ func main() {
 	}
 
 	log.Printf("uploading video to telegram channel...")
-	if err := upl.UploadVideo("gopher.mp4", "sample test"); err != nil {
+	if err := upl.UploadVideo("~/gopher.mp4", "sample test"); err != nil {
 		log.Fatalf("Error uploading video: %v", err)
 	}
 }
