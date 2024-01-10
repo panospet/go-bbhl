@@ -22,7 +22,7 @@ func EuroleagueLatestRound(
 		// get last euroleague round based on video title
 		round, err := util.ExtractElRound(v.Title)
 		if err != nil {
-			return nil, err
+			continue
 		}
 
 		byRound[round] = append(byRound[round], v)
