@@ -30,6 +30,14 @@ dry-run-euroleague:
 dry-run-nba:
 	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -nba -dry
 
+.PHONY: run-euroleague-skip-upload
+run-euroleague-skip-upload:
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -euroleague -skip-upload
+
+.PHONY: run-nba-skip-upload
+run-nba-skip-upload:
+	docker run --rm --env-file .env -v $(PWD)/data:/data p4nospet/basketball-highlights highlights -nba -skip-upload
+
 .PHONY: send-sample
 run-container-sample:
 	docker run --rm --env-file .env p4nospet/basketball-highlights sample
