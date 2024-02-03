@@ -33,10 +33,11 @@ type config struct {
 func main() {
 	ctx := context.Background()
 
-	var dry, nba, euroleague bool
+	var dry, nba, euroleague, remove bool
 	flag.BoolVar(&dry, "dry", false, "dry run")
 	flag.BoolVar(&nba, "nba", false, "run for nba")
 	flag.BoolVar(&euroleague, "euroleague", false, "run for euroleague")
+	flag.BoolVar(&remove, "remove", false, "remove videos after uploading")
 	flag.Parse()
 
 	cfg := config{}
@@ -178,8 +179,10 @@ func main() {
 	if err := os.Remove("./videos.txt"); err != nil {
 		log.Fatalf("Error removing videos.txt: %v", err)
 	}
-	if err := os.Remove("./output.mp4"); err != nil {
-		log.Fatalf("Error removing output.mp4: %v", err)
+	if remove {
+		if err := os.Remove("./output.mp4"); err != nil {
+			log.Fatalf("Error removing output.mp4: %v", err)
+		}
 	}
 
 	log.Printf("finished after %v", time.Since(start))
