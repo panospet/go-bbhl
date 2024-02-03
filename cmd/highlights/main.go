@@ -33,11 +33,12 @@ type config struct {
 func main() {
 	ctx := context.Background()
 
-	var dry, nba, euroleague, remove bool
+	var dry, nba, euroleague, remove, skipUpload bool
 	flag.BoolVar(&dry, "dry", false, "dry run")
 	flag.BoolVar(&nba, "nba", false, "run for nba")
 	flag.BoolVar(&euroleague, "euroleague", false, "run for euroleague")
 	flag.BoolVar(&remove, "remove", false, "remove output.mp4 after uploading")
+	flag.BoolVar(&skipUpload, "skip-upload", false, "skip uploading to telegram")
 	flag.Parse()
 
 	cfg := config{}
@@ -170,9 +171,11 @@ func main() {
 		log.Fatalf("Error removing videos directory: %v", err)
 	}
 
-	log.Printf("uploading video to telegram channel...")
-	if err := upl.UploadVideo("./data/output.mp4", caption); err != nil {
-		log.Fatalf("Error uploading video: %v", err)
+	if !skipUpload {
+		log.Printf("uploading video to telegram channel...")
+		if err := upl.UploadVideo("./data/output.mp4", caption); err != nil {
+			log.Fatalf("Error uploading video: %v", err)
+		}
 	}
 
 	// remove videos.txt and output.mp4
