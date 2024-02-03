@@ -37,7 +37,7 @@ func main() {
 	flag.BoolVar(&dry, "dry", false, "dry run")
 	flag.BoolVar(&nba, "nba", false, "run for nba")
 	flag.BoolVar(&euroleague, "euroleague", false, "run for euroleague")
-	flag.BoolVar(&remove, "remove", false, "remove videos after uploading")
+	flag.BoolVar(&remove, "remove", false, "remove output.mp4 after uploading")
 	flag.Parse()
 
 	cfg := config{}
@@ -156,7 +156,7 @@ func main() {
 	// use ffmpeg terminal command to concat files
 	// ffmpeg -f concat -safe 0 -i videos.txt -c copy output.mp4
 	cmd := exec.Command(
-		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", "output.mp4",
+		"ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "videos.txt", "-c", "copy", "./data/output.mp4",
 	)
 
 	err = cmd.Run()
@@ -180,7 +180,7 @@ func main() {
 		log.Fatalf("Error removing videos.txt: %v", err)
 	}
 	if remove {
-		if err := os.Remove("./output.mp4"); err != nil {
+		if err := os.Remove("./data/output.mp4"); err != nil {
 			log.Fatalf("Error removing output.mp4: %v", err)
 		}
 	}
