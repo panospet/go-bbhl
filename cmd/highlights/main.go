@@ -171,7 +171,7 @@ func main() {
 	}
 
 	log.Printf("uploading video to telegram channel...")
-	if err := upl.UploadVideo("output.mp4", caption); err != nil {
+	if err := upl.UploadVideo("./data/output.mp4", caption); err != nil {
 		log.Fatalf("Error uploading video: %v", err)
 	}
 
