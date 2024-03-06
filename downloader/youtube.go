@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/kkdai/youtube/v2"
 )
@@ -17,6 +18,24 @@ func NewYoutubeDownloader() *YoutubeDownloader {
 	return &YoutubeDownloader{
 		client: &youtube.Client{},
 	}
+}
+
+func (d *YoutubeDownloader) DownloadVideoRetry(
+	videoId string,
+	path string,
+	times int,
+) error {
+	var err error
+	for i := 0; i < times; i++ {
+		err = d.DownloadVideo(videoId, path)
+		if err == nil {
+			return nil
+		}
+		log.Printf("Error downloading video: %v (try no %d)", err, i)
+		time.Sleep(30 * time.Second)
+	}
+
+	return err
 }
 
 func (d *YoutubeDownloader) DownloadVideo(

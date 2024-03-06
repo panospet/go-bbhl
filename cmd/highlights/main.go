@@ -128,8 +128,8 @@ func main() {
 
 		log.Printf("Downloading video: %s, id: %v, path: %s", v.Title, v.Id, videoPath)
 		if !dry {
-			if err := dl.DownloadVideo(v.Id, videoPath); err != nil {
-				log.Fatalf("Error downloading video: %v", err)
+			if err := dl.DownloadVideoRetry(v.Id, videoPath, 10); err != nil {
+				log.Printf("Error downloading video: %v", err)
 			}
 		}
 	}
