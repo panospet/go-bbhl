@@ -19,6 +19,8 @@ func EuroleagueLatestRound(
 			continue
 		}
 
+		log.Printf("Processing video: %v", v.Title)
+
 		// get last euroleague round based on video title
 		round, err := util.ExtractElRound(v.Title)
 		if err != nil {
