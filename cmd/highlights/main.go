@@ -60,7 +60,7 @@ func main() {
 	}
 	if euroleague {
 		channelId = euroleagueChannelId
-		filter = filters.EuroleagueLatestRound
+		filter = filters.Euroleague
 		caption = "latest Euroleague Highlights"
 	}
 
